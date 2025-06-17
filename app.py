@@ -20,7 +20,7 @@ if shutil.which("tesseract") is None:
 
 # Set Tesseract command based on the platform
 if platform.system() == "Windows":
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 elif platform.system() == "Linux":
     pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
