@@ -158,7 +158,7 @@ if st.session_state.get("submitted", False):
     # ✅ Show score + chart
     st.info(f"🎯 Your Score: **{correct_count} / {len(st.session_state['mcqs'])}**")
     fig, ax = plt.subplots(figsize = (3,3))
-ax.pie([correct_count, wrong_count], labels=['Correct', 'Wrong'], autopct='%1.1f%%', colors=["green", "red"])
+    ax.pie([correct_count, wrong_count], labels=['Correct', 'Wrong'], autopct='%1.1f%%', colors=["green", "red"])
     st.pyplot(fig)
 
     # ✅ PDF download
