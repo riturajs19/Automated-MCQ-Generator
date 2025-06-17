@@ -7,8 +7,14 @@ import cv2
 import random
 from MCQ_Generator import generate_mcqs_from_text
 
-# Tesseract path
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+import platform
+# Set Tesseract command based on the platform
+if platform.system() == "Windows":
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# Ensure Tesseract is installed and configured correctly
+elif platform.system() == "Linux":
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
 # Streamlit setup
 st.set_page_config(page_title="📘 Interactive MCQ Quiz", layout="centered")
