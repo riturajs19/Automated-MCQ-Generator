@@ -5,14 +5,22 @@ import PyPDF2
 import numpy as np
 import cv2
 import random
+import platform
+from fpdf import FPDF
+import base64
+import matplotlib.pyplot as plt
 from MCQ_Generator import generate_mcqs_from_text
 
+import shutil
 
-import platform
+if shutil.which("tesseract") is None:
+    st.error("❌ Tesseract is not installed or not found in PATH.")
+    st.stop()
+
+
 # Set Tesseract command based on the platform
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-# Ensure Tesseract is installed and configured correctly
 elif platform.system() == "Linux":
     pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
@@ -27,10 +35,40 @@ def preprocess_image(img):
     _, thresh_img = cv2.threshold(open_cv_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return Image.fromarray(thresh_img)
 
-# File uploader
-uploaded_file = st.file_uploader("Upload a PDF or Image (JPEG/PNG)", type=["pdf", "jpg", "jpeg", "png"])
+# PDF generation
+def generate_pdf(mcqs):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="MCQ Quiz", ln=True, align='C')
+    pdf.ln(5)
 
+    for idx, q in enumerate(mcqs):
+        pdf.multi_cell(0, 10, f"Q{idx+1}. {q['question']}")
+        for opt in q['options']:
+            pdf.cell(0, 10, f"   - {opt}", ln=True)
+        pdf.cell(0, 10, f"Answer: {q['answer']}", ln=True)
+        pdf.ln(5)
+
+    return pdf.output(dest='S').encode('latin1')
+
+def get_pdf_download_link(pdf_data):
+    b64 = base64.b64encode(pdf_data).decode()
+    return f'<a href="data:application/pdf;base64,{b64}" download="mcq_quiz.pdf">📥 Download MCQs as PDF</a>'
+
+# Motivational Quotes
+quotes = [
+    "Believe in yourself and all that you are! 🌟",
+    "Your only limit is your mind. 💡",
+    "Every expert was once a beginner. 🚀",
+    "Success is the sum of small efforts. 🔁",
+    "Don’t wish for it. Work for it. 🎯"
+]
+
+# File uploader
+uploaded_file = st.file_uploader("📤 Upload a PDF or Image (JPEG/PNG)", type=["pdf", "jpg", "jpeg", "png"])
 text = ""
+
 if uploaded_file is not None:
     file_type = uploaded_file.type
 
@@ -49,14 +87,14 @@ if uploaded_file is not None:
     st.text_area("📝 Extracted Text", text, height=200)
 
 # Number of questions
-num_questions = st.slider("Select number of MCQs to generate", 1, 10, 5)
+num_questions = st.slider("🎯 Select number of MCQs to generate", 1, 10, 5)
 
 # Generate Quiz
 if st.button("Generate Quiz"):
     if not text.strip():
-        st.warning("Please upload a valid file with readable text.")
+        st.warning("⚠️ Please upload a valid file with readable text.")
     else:
-        with st.spinner("Generating MCQs..."):
+        with st.spinner("⏳ Generating MCQs..."):
             mcqs = generate_mcqs_from_text(text, num_questions)
             if not mcqs:
                 st.error("❌ Could not generate any questions.")
@@ -68,14 +106,14 @@ if st.button("Generate Quiz"):
 # Show MCQs
 if "mcqs" in st.session_state and not st.session_state.get("submitted", False):
     with st.form("quiz_form"):
-        st.subheader("📝 Quiz")
+        st.subheader("📚 Quiz Time")
         user_answers = []
         for idx, q in enumerate(st.session_state["mcqs"]):
             st.markdown(f"<h5 style='font-size: 20px;'>Q{idx + 1}. {q['question']}</h5>", unsafe_allow_html=True)
             user_choice = st.radio("", q['options'], key=f"q_{idx}")
             user_answers.append(user_choice)
 
-        submitted = st.form_submit_button("Submit Answers")
+        submitted = st.form_submit_button("✅ Submit Answers")
         if submitted:
             st.session_state["submitted"] = True
             st.session_state["user_answers"] = user_answers
@@ -85,6 +123,7 @@ if "mcqs" in st.session_state and not st.session_state.get("submitted", False):
 if st.session_state.get("submitted", False):
     st.subheader("📊 Results")
     correct_count = 0
+    wrong_count = 0
 
     for idx, q in enumerate(st.session_state["mcqs"]):
         user_ans = st.session_state["user_answers"][idx]
@@ -94,8 +133,24 @@ if st.session_state.get("submitted", False):
             correct_count += 1
         else:
             st.error(f"❌ Q{idx + 1}: Wrong — You chose `{user_ans}`, Correct is `{correct_ans}`")
+            wrong_count += 1
         st.markdown("---")
 
     st.info(f"🎯 Your Score: **{correct_count} / {len(st.session_state['mcqs'])}**")
-    st.balloons()
-# Reset button  
+
+    # Pie chart
+    fig, ax = plt.subplots()
+    ax.pie([correct_count, wrong_count], labels=['Correct', 'Wrong'], autopct='%1.1f%%', colors=["green", "red"])
+    st.pyplot(fig)
+
+    # Download PDF
+    pdf_bytes = generate_pdf(st.session_state["mcqs"])
+    st.markdown(get_pdf_download_link(pdf_bytes), unsafe_allow_html=True)
+
+    # Motivation
+    st.markdown(f"💡 **{random.choice(quotes)}**")
+
+    # Reset
+    if st.button("🔄 Start Over"):
+        st.session_state.clear()
+        st.rerun()

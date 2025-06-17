@@ -1,6 +1,9 @@
 streamlit
-pytesseract
-opencv-python
-pillow
-PyPDF2
 spacy
+pytesseract
+fpdf
+PyPDF2
+numpy
+Pillow
+opencv-python-headless
+matplotlib
