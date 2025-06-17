@@ -1,20 +1,9 @@
 services:
   - type: web
-    name: mcq-generator
+    name: mcq-generator-app
     env: python
-    buildCommand: |
-      ./setup.sh
-      pip install -r requirements.txt
+    buildCommand: ./setup.sh
     startCommand: streamlit run app.py
+    region: oregon
     plan: free
-    envVars:
-      - key: STREAMLIT_SERVER_PORT
-        value: "8501"
-      - key: STREAMLIT_SERVER_ENABLE_CORS
-        value: "false"
-      - key: STREAMLIT_SERVER_HEADLESS
-        value: "true"
-      - key: STREAMLIT_SERVER_ENABLE_WEBSOCKET_COMPRESSION
-        value: "true"
-
 
