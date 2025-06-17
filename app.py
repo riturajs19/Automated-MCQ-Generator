@@ -10,6 +10,9 @@ from fpdf import FPDF
 import base64
 import matplotlib.pyplot as plt
 from MCQ_Generator import generate_mcqs_from_text
+import os
+st.write("PATH:", os.environ.get("PATH"))
+# Check if Tesseract is installed
 
 import shutil
 
