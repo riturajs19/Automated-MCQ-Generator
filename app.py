@@ -16,11 +16,6 @@ st.write("PATH:", os.environ.get("PATH"))
 
 import shutil
 
-if shutil.which("tesseract") is None:
-    st.error("❌ Tesseract is not installed or not found in PATH.")
-    st.stop()
-
-
 # Set Tesseract command based on the platform
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
@@ -30,6 +25,11 @@ elif platform.system() == "Linux":
 # Streamlit setup
 st.set_page_config(page_title="📘 Interactive MCQ Quiz", layout="centered")
 st.title("🧠 Interactive MCQ Quiz from PDF or Image")
+
+
+if shutil.which("tesseract") is None:
+    st.error("❌ Tesseract is not installed or not found in PATH.")
+    st.stop()
 
 # Image preprocessing
 def preprocess_image(img):
