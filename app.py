@@ -1,9 +1,9 @@
 import streamlit as st
 
-# ✅ Set this as the VERY FIRST Streamlit command
+
 st.set_page_config(page_title="📘 Interactive MCQ Quiz", layout="centered")
 
-# Other imports
+
 import random
 import pytesseract
 import platform
@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import shutil
 import unicodedata
 
-# ✅ Load SpaCy model
+
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:

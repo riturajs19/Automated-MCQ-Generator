@@ -51,19 +51,14 @@ def generate_mcqs_from_text(text, num_questions=3):
         })
 
     return mcqs
-
-# ---- RUN THE MCQ GENERATOR ----
-text = """
-Statistics is the science of collecting, organizing, and interpreting data.
-Probability is a measure of the likelihood that a particular event will occur.
-It is used in fields such as mathematics, finance, and artificial intelligence.
-"""
+text = """The quick brown fox jumps over the lazy dog. The dog barked loudly at the fox.
+The sun sets in the west, painting the sky with hues of orange and pink. Birds chirp as they return to their nests. The river flows gently, reflecting the colors of the sky."""
 
 mcqs = generate_mcqs_from_text(text, 3)
 
-# ✅ Clean Output
+
 for i, mcq in enumerate(mcqs, 1):
     print(f"\nQ{i}. {mcq['question']}")
     for j, opt in enumerate(mcq['options']):
         print(f"   {chr(65 + j)}. {opt}")
-    print(f"✅ Answer: {mcq['answer']}")
+    print(f" Answer: {mcq['answer']}")

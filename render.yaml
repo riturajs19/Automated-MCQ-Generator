@@ -1,8 +1,8 @@
-services:
-  - type: web
-    name: mcq-generator-app
-    env: python
-    buildCommand: ./setup.sh && pip install -r requirements.txt
-    startCommand: streamlit run app.py
+services: ## Basically to tell what i want to host
+  - type: web ## We are defining a web service
+    name: mcq-generator-app ## name of the service on render dashboard
+    env: python ## Creates python env for me
+    buildCommand: ./setup.sh && pip install -r requirements.txt ## Helps to install dependencies
+    startCommand: streamlit run app.py ## As streamlit is swb server so we need to run it
     plan: free
-    region: oregon
+    region: oregon ## region where I want to host
