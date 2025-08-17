@@ -1,9 +1,4 @@
 import streamlit as st
-
-
-st.set_page_config(page_title="📘 Interactive MCQ Quiz", layout="centered")
-
-
 import random
 import pytesseract
 import platform
@@ -17,14 +12,20 @@ import base64
 import matplotlib.pyplot as plt
 import shutil
 import unicodedata
+import nltk
+from nltk.corpus import wordnet as wn
 
-
+# ================= NLP & WordNet Setup =================
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
     from spacy.cli import download
     download("en_core_web_sm")
     nlp = spacy.load("en_core_web_sm")
+
+# Download WordNet if not already
+nltk.download('wordnet')
+nltk.download('omw-1.4')
 
 # ✅ Tesseract path setup
 if platform.system() == "Windows":
@@ -51,6 +52,28 @@ def extract_nouns(text):
     doc = nlp(text)
     return list(set(token.text for token in doc if token.pos_ == "NOUN" and len(token.text) > 2))
 
+def get_wordnet_distractors(correct):
+    distractors = set()
+    synsets = wn.synsets(correct)
+    for syn in synsets:
+        # Synonyms
+        for lemma in syn.lemmas():
+            if lemma.name().lower() != correct.lower():
+                distractors.add(lemma.name().replace('_', ' '))
+        # Hypernyms
+        for hyper in syn.hypernyms():
+            for lemma in hyper.lemmas():
+                distractors.add(lemma.name().replace('_', ' '))
+        # Hyponyms
+        for hypo in syn.hyponyms():
+            for lemma in hypo.lemmas():
+                distractors.add(lemma.name().replace('_', ' '))
+    # Limit to 3 distractors
+    distractors = list(distractors)
+    if len(distractors) > 3:
+        distractors = random.sample(distractors, 3)
+    return distractors
+
 def generate_mcqs_from_text(text, num_questions=5):
     doc = nlp(text)
     sentences = list(doc.sents)
@@ -70,10 +93,13 @@ def generate_mcqs_from_text(text, num_questions=5):
             continue
         used_sentences.add(sentence)
         blanked = sentence.replace(correct, "____", 1)
-        distractors = [n for n in all_nouns if n != correct]
+
+        # Generate distractors using WordNet, fallback to text nouns
+        distractors = get_wordnet_distractors(correct)
         if len(distractors) < 3:
-            continue
-        options = random.sample(distractors, 3) + [correct]
+            fallback = [n for n in all_nouns if n != correct]
+            distractors += random.sample(fallback, min(3 - len(distractors), len(fallback)))
+        options = distractors + [correct]
         random.shuffle(options)
         mcqs.append({"question": blanked, "options": options, "answer": correct})
     return mcqs
